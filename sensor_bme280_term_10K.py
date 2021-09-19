@@ -82,7 +82,7 @@ class EmailThread(Thread):
                 print('Email enviado com sucesso.')
         except FileNotFoundError:
             print('Email não enviado.')
-        path1 = ''
+        path1 = 0
         while not path1:
             try:
                 os.remove(f'{self.path}/Umidade{self.inicio}.pdf')
@@ -92,7 +92,8 @@ class EmailThread(Thread):
                 path1 = 1
             except OSError:
                 print('Entre com um caminho valido !!!')
-                path1 = input('Digite o caminho completo onde o executável está rodando: ')
+                self.path = input('Digite o caminho completo onde o executável está rodando: ')
+                path1 = 0
 
 
 class ConvertTempo:

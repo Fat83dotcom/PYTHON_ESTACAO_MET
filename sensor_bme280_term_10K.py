@@ -1,3 +1,4 @@
+from tqdm import tqdm
 import os
 import serial
 import time
@@ -12,6 +13,8 @@ from confidentials import meu_email, minha_senha, my_recipients
 
 set_porta = '/dev/ttyACM0'
 
+path = os.path.dirname(os.path.realpath(__file__))
+
 while set_porta:
     try:
         arduino = serial.Serial(set_porta, 115200, timeout=1)
@@ -20,8 +23,6 @@ while set_porta:
     except serial.serialutil.SerialException:
         set_porta = input('Digite a porta serial em que o Arduino está conectado: ')
 print(f'O Arduino está na porta: {set_porta}')
-
-path = input('Digite o caminho completo onde o executável está rodando: ')
 
 
 class EmailThread(Thread):
@@ -79,21 +80,15 @@ class EmailThread(Thread):
                 smtp.starttls()
                 smtp.login(meu_email, minha_senha)
                 smtp.send_message(msg)
-                print('Email enviado com sucesso.')
+                # print('Email enviado com sucesso.')
         except FileNotFoundError:
-            print('Email não enviado.')
-        path1 = 0
-        while not path1:
-            try:
-                os.remove(f'{self.path}/Umidade{self.inicio}.pdf')
-                os.remove(f'{self.path}/Pressao{self.inicio}.pdf')
-                os.remove(f'{self.path}/Temperatura_Interna{self.inicio}.pdf')
-                os.remove(f'{self.path}/Temperatura_Externa{self.inicio}.pdf')
-                path1 = 1
-            except OSError:
-                print('Entre com um caminho valido !!!')
-                self.path = input('Digite o caminho completo onde o executável está rodando: ')
-                path1 = 0
+            # print('Email não enviado.')
+            pass
+
+        os.remove(f'{self.path}/Umidade{self.inicio}.pdf')
+        os.remove(f'{self.path}/Pressao{self.inicio}.pdf')
+        os.remove(f'{self.path}/Temperatura_Interna{self.inicio}.pdf')
+        os.remove(f'{self.path}/Temperatura_Externa{self.inicio}.pdf')
 
 
 class ConvertTempo:
@@ -133,9 +128,9 @@ def mini(dados):
     return round(min(dados), 2)
 
 
-def plot_umidade(uy, inicio):
+def plot_umidade(uy, inicio, path):
     ux = range(len(uy))
-    file = f'Umidade{inicio}.pdf'
+    file = f'{path}/Umidade{inicio}.pdf'
     plt.title(f'Gráfico Umidade\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maxi(uy)} --- Mínima: {mini(uy)}')
     plt.xlabel('Tempo em segundos.')
     plt.ylabel('Umidade Relativa do Ar %')
@@ -144,9 +139,9 @@ def plot_umidade(uy, inicio):
     plt.clf()
 
 
-def plot_pressao(py, inicio):
+def plot_pressao(py, inicio, path):
     px = range(len(py))
-    file = f'Pressao{inicio}.pdf'
+    file = f'{path}/Pressao{inicio}.pdf'
     plt.title(f'Gráfico Pressão\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maxi(py)} --- Mínima: {mini(py)}')
     plt.xlabel('Tempo em segundos.')
     plt.ylabel('Pressão Atmosferica em hPa')
@@ -155,9 +150,9 @@ def plot_pressao(py, inicio):
     plt.clf()
 
 
-def plot_temp1(t1y, inicio):
+def plot_temp1(t1y, inicio, path):
     t1x = range(len(t1y))
-    file = f'Temperatura_Interna{inicio}.pdf'
+    file = f'{path}/Temperatura_Interna{inicio}.pdf'
     plt.title(f'Gráfico Temp Interna\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maxi(t1y)} --- Mínima: {mini(t1y)}')
     plt.xlabel('Tempo em segundos.')
     plt.ylabel('Temperatura em °C')
@@ -166,9 +161,9 @@ def plot_temp1(t1y, inicio):
     plt.clf()
 
 
-def plot_temp2(t2y, inicio):
+def plot_temp2(t2y, inicio, path):
     t2x = range(len(t2y))
-    file = f'Temperatura_Externa{inicio}.pdf'
+    file = f'{path}/Temperatura_Externa{inicio}.pdf'
     plt.title(f'Gráfico Temp Externa\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maxi(t2y)} --- Mínima: {mini(t2y)}')
     plt.xlabel('Tempo em segundos.')
     plt.ylabel('Temperatura em °C')
@@ -238,6 +233,7 @@ def main():
             arduino.reset_input_buffer()
         else:
             print(f'Parcial {cont3} --> {data()} <--')
+
         inicio = data()
 
         uy = []
@@ -253,40 +249,42 @@ def main():
         }
 
         cont2 = 0
-        while cont2 < tempo_graf:
-            cont = 0
-            while cont < 8:
-                dado = str(arduino.readline())
-                dado = dado[2:-5]
-                try:
-                    if dado[0] == 'u':
-                        d1['u'] = float(dado[1:].strip())
-                    if dado[0] == 'p':
-                        d1['p'] = float(dado[1:].strip())
-                    if dado[0] == '1':
-                        d1['1'] = float(dado[1:].strip())
-                    if dado[0] == '2':
-                        d1['2'] = float(dado[1:].strip())
-                except (ValueError, IndexError):
-                    continue
-                cont += 1
-            with open('log_bme280.csv', 'a+', newline='', encoding='utf-8') as file:
-                try:
-                    w = csv.writer(file)
-                    w.writerow([data(), d1['u'], d1['p'], d1['1'], d1['2']])
-                    uy.append(float(d1['u']))
-                    py.append(float(d1['p']))
-                    t1y.append(float(d1['1']))
-                    t2y.append(float(d1['2']))
-                    cont2 += 1
-                    time.sleep(1)
-                except ValueError:
-                    print('error')
-                    continue
-        plot_umidade(uy, inicio)
-        plot_pressao(py, inicio)
-        plot_temp1(t1y, inicio)
-        plot_temp2(t2y, inicio)
+        with tqdm(total=tempo_graf) as barra:
+            while cont2 < tempo_graf:
+                cont = 0
+                while cont < 8:
+                    try:
+                        dado = str(arduino.readline())
+                        dado = dado[2:-5]
+                        if dado[0] == 'u':
+                            d1['u'] = float(dado[1:].strip())
+                        if dado[0] == 'p':
+                            d1['p'] = float(dado[1:].strip())
+                        if dado[0] == '1':
+                            d1['1'] = float(dado[1:].strip())
+                        if dado[0] == '2':
+                            d1['2'] = float(dado[1:].strip())
+                    except (ValueError, IndexError):
+                        continue
+                    cont += 1
+                with open('log_bme280.csv', 'a+', newline='', encoding='utf-8') as file:
+                    try:
+                        w = csv.writer(file)
+                        w.writerow([data(), d1['u'], d1['p'], d1['1'], d1['2']])
+                        uy.append(float(d1['u']))
+                        py.append(float(d1['p']))
+                        t1y.append(float(d1['1']))
+                        t2y.append(float(d1['2']))
+                        cont2 += 1
+                        barra.update(1)
+                        time.sleep(0.99)
+                    except ValueError:
+                        print('error')
+                        continue
+        plot_umidade(uy, inicio, path)
+        plot_pressao(py, inicio, path)
+        plot_temp1(t1y, inicio, path)
+        plot_temp2(t2y, inicio, path)
         cont3 += 1
         emaail = EmailThread(inicio, path)
         emaail.start()

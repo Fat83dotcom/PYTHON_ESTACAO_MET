@@ -39,10 +39,10 @@ class EmailThread(Thread):
         corpo = MIMEText(f'Gráficos, {data()}')
         msg.attach(corpo)
         try:
-            umidade = f'Umidade{self.inicio}.pdf'
-            pressao = f'Pressao{self.inicio}.pdf'
-            tmp1 = f'Temperatura_Interna{self.inicio}.pdf'
-            temp2 = f'Temperatura_Externa{self.inicio}.pdf'
+            umidade = f'{self.path}/Umidade{self.inicio}.pdf'
+            pressao = f'{self.path}/Pressao{self.inicio}.pdf'
+            tmp1 = f'{self.path}/Temperatura_Interna{self.inicio}.pdf'
+            temp2 = f'{self.path}/Temperatura_Externa{self.inicio}.pdf'
             # log = '/home/fernando/PYTHON_PIPENV_ESTACAO_METEREO/log_bme280.csv'
 
             with open(umidade, 'rb') as pdf_U:

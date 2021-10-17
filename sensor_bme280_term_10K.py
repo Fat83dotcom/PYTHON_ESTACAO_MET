@@ -10,6 +10,8 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import smtplib
 from confidentials import meu_email, minha_senha, my_recipients
+from temp import recebe_dados
+from statistics import mean
 
 set_porta = '/dev/ttyACM0'
 
@@ -26,17 +28,21 @@ print(f'O Arduino está na porta: {set_porta}')
 
 
 class EmailThread(Thread):
-    def __init__(self, inicio, path):
+    def __init__(self, inicio, umi, press, t1, t2, path):
         super().__init__()
         self.inicio = inicio
         self.path = path
+        self.umi = umi
+        self.press = press
+        self.t1 = t1
+        self.t2 = t2
 
     def run(self):
         msg = MIMEMultipart()
         msg['from'] = 'Fernando Mendes'
         msg['to'] = ', '.join(my_recipients)
         msg['subject'] = f'Monitoramento Estação Metereologica Fat83dotcom {data()}'
-        corpo = MIMEText(f'Gráficos, {data()}')
+        corpo = MIMEText(recebe_dados(self.umi, self.press, self.t1, self.t2, data()), 'html')
         msg.attach(corpo)
         try:
             umidade = f'{self.path}/Umidade{self.inicio}.pdf'
@@ -267,9 +273,9 @@ def main():
                     except (ValueError, IndexError):
                         continue
                     cont += 1
-                with open('log_bme280.csv', 'a+', newline='', encoding='utf-8') as file:
+                with open('log_bme280.csv', 'a+', newline='', encoding='utf-8') as log:
                     try:
-                        w = csv.writer(file)
+                        w = csv.writer(log)
                         w.writerow([data(), d1['u'], d1['p'], d1['1'], d1['2']])
                         uy.append(float(d1['u']))
                         py.append(float(d1['p']))
@@ -277,7 +283,7 @@ def main():
                         t2y.append(float(d1['2']))
                         cont2 += 1
                         barra.update(1)
-                        time.sleep(0.99)
+                        time.sleep(0.95)
                     except ValueError:
                         print('error')
                         continue
@@ -286,7 +292,7 @@ def main():
         plot_temp1(t1y, inicio, path)
         plot_temp2(t2y, inicio, path)
         cont3 += 1
-        emaail = EmailThread(inicio, path)
+        emaail = EmailThread(inicio, round(mean(uy)), round(mean(py)), round(mean(t1y)), round(mean(t2y)), path)
         emaail.start()
 
 

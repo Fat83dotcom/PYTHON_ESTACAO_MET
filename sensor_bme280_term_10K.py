@@ -28,7 +28,8 @@ print(f'O Arduino está na porta: {set_porta}')
 
 
 class EmailThread(Thread):
-    def __init__(self, inicio, umi, press, t1, t2, path):
+    def __init__(self, inicio, umi, press, t1, t2, t1max,
+                 t1min, t2max, t2min, ini, fim, path):
         super().__init__()
         self.inicio = inicio
         self.path = path
@@ -36,13 +37,21 @@ class EmailThread(Thread):
         self.press = press
         self.t1 = t1
         self.t2 = t2
+        self.t1max = t1max
+        self.t1min = t1min
+        self.t2max = t2max
+        self.t2min = t2min
+        self.ini = ini
+        self.fim = fim
 
     def run(self):
         msg = MIMEMultipart()
         msg['from'] = 'Fernando Mendes'
         msg['to'] = ', '.join(my_recipients)
         msg['subject'] = f'Monitoramento Estação Metereologica Fat83dotcom {data()}'
-        corpo = MIMEText(recebe_dados(self.umi, self.press, self.t1, self.t2, data()), 'html')
+        corpo = MIMEText(recebe_dados(self.umi, self.press, self.t1, self.t2,
+                         self.t1max, self.t1min, self.t2max, self.t2min, self.ini,
+                         self.fim, data()), 'html')
         msg.attach(corpo)
         try:
             umidade = f'{self.path}/Umidade{self.inicio}.pdf'
@@ -283,7 +292,7 @@ def main():
                         t2y.append(float(d1['2']))
                         cont2 += 1
                         barra.update(1)
-                        time.sleep(0.95)
+                        time.sleep(0.90)
                     except ValueError:
                         print('error')
                         continue
@@ -292,7 +301,10 @@ def main():
         plot_temp1(t1y, inicio, path)
         plot_temp2(t2y, inicio, path)
         cont3 += 1
-        emaail = EmailThread(inicio, round(mean(uy)), round(mean(py)), round(mean(t1y)), round(mean(t2y)), path)
+        emaail = EmailThread(inicio, round(mean(uy), 2), round(mean(py), 2),
+                             round(mean(t1y), 2), round(mean(t2y), 2),
+                             maxi(t1y), mini(t1y), maxi(t2y), mini(t2y),
+                             inicio, data(), path)
         emaail.start()
 
 

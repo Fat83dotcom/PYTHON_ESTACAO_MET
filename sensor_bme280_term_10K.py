@@ -29,7 +29,8 @@ print(f'O Arduino está na porta: {set_porta}')
 
 class EmailThread(Thread):
     def __init__(self, inicio, umi, press, t1, t2, t1max,
-                 t1min, t2max, t2min, ini, fim, path):
+                 t1min, t2max, t2min, umimax, umimini,
+                 pressmax, pressmini, ini, fim, path):
         super().__init__()
         self.inicio = inicio
         self.path = path
@@ -41,6 +42,10 @@ class EmailThread(Thread):
         self.t1min = t1min
         self.t2max = t2max
         self.t2min = t2min
+        self.umimax = umimax
+        self.umimini = umimini
+        self.pressmax = pressmax
+        self.pressmini = pressmini
         self.ini = ini
         self.fim = fim
 
@@ -50,8 +55,9 @@ class EmailThread(Thread):
         msg['to'] = ', '.join(my_recipients)
         msg['subject'] = f'Monitoramento Estação Metereologica Fat83dotcom {data()}'
         corpo = MIMEText(recebe_dados(self.umi, self.press, self.t1, self.t2,
-                         self.t1max, self.t1min, self.t2max, self.t2min, self.ini,
-                         self.fim, data()), 'html')
+                         self.t1max, self.t1min, self.t2max, self.t2min,
+                         self.umimax, self.umimini, self.pressmax, self.pressmini,
+                         self.ini, self.fim, data()), 'html')
         msg.attach(corpo)
         try:
             umidade = f'{self.path}/Umidade{self.inicio}.pdf'
@@ -131,12 +137,15 @@ class ConvertTempo:
 
 
 def recebe_dados(umidade, pressao, temp1, temp2, temp1max, temp1min,
-                 temp2max, temp2min, inicio, fim, data):
+                 temp2max, temp2min, umima, umimi, pressma, pressmi,
+                 inicio, fim, data):
     with open('template.html', 'r') as doc:
         template = Template(doc.read())
         corpo_msg = template.safe_substitute(umi=umidade, press=pressao, t1=temp1, t2=temp2,
                                              t1max=temp1max, t1min=temp1min, t2max=temp2max,
-                                             t2min=temp2min, ini=inicio, fim=fim, dat=data)
+                                             t2min=temp2min, umimax=umima, umimini=umimi,
+                                             pressmax=pressma, pressmini=pressmi, ini=inicio,
+                                             fim=fim, dat=data)
     return corpo_msg
 
 
@@ -314,6 +323,7 @@ def main():
         emaail = EmailThread(inicio, round(mean(uy), 2), round(mean(py), 2),
                              round(mean(t1y), 2), round(mean(t2y), 2),
                              maxi(t1y), mini(t1y), maxi(t2y), mini(t2y),
+                             maxi(uy), mini(uy), maxi(py), mini(py),
                              inicio, data(), path)
         emaail.start()
 

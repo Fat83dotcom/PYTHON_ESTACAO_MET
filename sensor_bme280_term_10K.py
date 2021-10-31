@@ -9,9 +9,16 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import smtplib
-from confidentials import meu_email, minha_senha, my_recipients
+from confidentials import meu_email, minha_senha, my_recipients, define_arquivo
 from statistics import mean
 from string import Template
+
+if os.path.isfile('EMAIL_USER_DATA.txt'):
+    print('Arquivo "EMAIL_USER_DATA.txt" já existe.')
+else:
+    define_arquivo()
+    print('Arquivo "EMAIL_USER_DATA.txt" foi criado, por favor, configure antes de continuar. Digite enter para continuar...')
+    input()
 
 set_porta = '/dev/ttyACM0'
 
@@ -134,6 +141,35 @@ class ConvertTempo:
         soma = soma.convert_hr_segundo() + soma.convert_min_segundo()
         soma += self.segundo
         return soma
+
+
+def leia_me():
+    with open('LEIA_ME.txt', 'w') as file:
+        texto = '''
+                ***
+                Para usar corretamente este programa, você deve observar os seguintes procedimentos:
+
+                -> No arquivo "EMAIL_USER_DATA" é o local onde o usuário irá configurar seu login de
+                email, respeitando algumas regras simples que, se não seguidas, podem ocasionar
+                funcionamento inesperado, erros ou a quebra do programa.
+
+                AS REGRAS SÃO:
+
+                -> NA PRIMEIRA E SEGUNDA LINHA DO ARQUIVO, NOS CAMPOS "MEU EMAIL" E "MINHA SENHA", APÓS ":" COLOQUE UM (1) ESPAÇO E APENAS UM (1)
+                ESPAÇO, E CASO ESSA REGRA NÃO SEJA SEGUIDA, O PROGRAMA NÃO LERÁ CORRETAMENTE OS DADOS E NÃO ENVIARÁ OS EMAILS CORRETAMENTE.
+
+                -> NA TERCEIRA LINHA, INSIRA OS EMAILS DOS DESTINATARIOS, SEPARADOS POR VIRGULAS E SEM QUEBRAS DE LINHA.
+                SE HOUVER QUEBRA DE LINHA, O PROGRAMA AINDA ENVIARÁ OS EMAILS MAS OCORRERÁ ERROS E OMISSÕES DE DADOS INDESEJADAS.
+
+                -> SEGUINDO ESSAS REGRAS É ESPERADO QUE OS EMAILS SEJAM ENVIADOS SEM PROBLEMAS E, CASO ACONTEÇA ALGUM
+                PROBLEMA, POR FAVOR, ENTRAR EM CONTATO COM O DESENVOLVEDOR EXPLICANDO O PROBLEMA.
+
+
+                OBRIGADO!!!
+
+                ***
+        '''
+        file.write(texto)
 
 
 def recebe_dados(umidade, pressao, temp1, temp2, temp1max, temp1min,
@@ -329,4 +365,5 @@ def main():
 
 
 while 1:
+    leia_me()
     main()

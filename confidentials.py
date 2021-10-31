@@ -2,6 +2,11 @@
 Este modulo faz a leitura do email, senha e destinatários de um arquivo externo, que deve estar na
 mesma pasta que o executável Python
 '''
+modelo = '''
+Seu email: xxxxx@xxxxx.com
+Sua senha: 123456789
+Destinatarios aqui!
+'''
 
 
 def meu_email():
@@ -21,11 +26,16 @@ def minha_senha():
 def my_recipients():
     with open('EMAIL_USER_DATA.txt', 'r') as file:
         file.seek(0)
-        emails = [i for e, i in enumerate(file.readlines()) if e == 2 and i != '\n']
+        emails = [i for e, i in enumerate(file.readlines()) if e >= 2 and i != '\n']
         return emails
 
 
+def define_arquivo():
+    with open('EMAIL_USER_DATA.txt', 'w') as file:
+        file.write(modelo)
+
+
 if __name__ == '__main__':
-    print(': '.join(meu_email()))
-    print(': '.join(minha_senha()))
+    # print(''.join(meu_email()))
+    # print(''.join(minha_senha()))
     print(''.join(my_recipients()))

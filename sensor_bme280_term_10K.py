@@ -52,7 +52,7 @@ class EmailThread(Thread):
     def run(self):
         msg = MIMEMultipart()
         msg['from'] = 'Fernando Mendes'
-        msg['to'] = ', '.join(my_recipients)
+        msg['to'] = ','.join(my_recipients())
         msg['subject'] = f'Monitoramento Estação Metereologica Fat83dotcom {data()}'
         corpo = MIMEText(recebe_dados(self.umi, self.press, self.t1, self.t2,
                          self.t1max, self.t1min, self.t2max, self.t2min,
@@ -99,7 +99,7 @@ class EmailThread(Thread):
             with smtplib.SMTP(host='smtp.gmail.com', port=587) as smtp:
                 smtp.ehlo()
                 smtp.starttls()
-                smtp.login(meu_email, minha_senha)
+                smtp.login(''.join(meu_email()), ''.join(minha_senha()))
                 smtp.send_message(msg)
                 # print('Email enviado com sucesso.')
         except FileNotFoundError:

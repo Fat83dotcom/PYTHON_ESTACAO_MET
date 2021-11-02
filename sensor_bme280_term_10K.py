@@ -12,6 +12,9 @@ import smtplib
 from confidentials import meu_email, minha_senha, my_recipients, define_arquivo
 from statistics import mean
 from string import Template
+from itertools import count
+from math import nan
+
 
 if os.path.isfile('EMAIL_USER_DATA.txt'):
     print('Arquivo "EMAIL_USER_DATA.txt" já existe.')
@@ -295,7 +298,8 @@ def call_tempo():
 
 
 def main():
-    cont3 = 0
+    c3 = count()
+    cont3 = next(c3)
     while 1:
         if cont3 == 0:
             tempo_graf = int(flagEntry())
@@ -317,26 +321,30 @@ def main():
             '1': '',
             '2': ''
         }
-
-        cont2 = 0
+        c2 = count()
+        cont2 = next(c2)
         with tqdm(total=tempo_graf) as barra:
             while cont2 < tempo_graf:
-                cont = 0
+                c1 = count()
+                cont = next(c1)
                 while cont < 8:
                     try:
                         dado = str(arduino.readline())
                         dado = dado[2:-5]
-                        if dado[0] == 'u':
-                            d1['u'] = float(dado[1:].strip())
-                        if dado[0] == 'p':
-                            d1['p'] = float(dado[1:].strip())
-                        if dado[0] == '1':
-                            d1['1'] = float(dado[1:].strip())
-                        if dado[0] == '2':
-                            d1['2'] = float(dado[1:].strip())
+                        if dado == nan:
+                            continue
+                        else:
+                            if dado[0] == 'u':
+                                d1['u'] = float(dado[1:].strip())
+                            if dado[0] == 'p':
+                                d1['p'] = float(dado[1:].strip())
+                            if dado[0] == '1':
+                                d1['1'] = float(dado[1:].strip())
+                            if dado[0] == '2':
+                                d1['2'] = float(dado[1:].strip())
                     except (ValueError, IndexError):
                         continue
-                    cont += 1
+                    cont = next(c1)
                 with open('log_bme280.csv', 'a+', newline='', encoding='utf-8') as log:
                     try:
                         w = csv.writer(log)
@@ -345,9 +353,9 @@ def main():
                         py.append(float(d1['p']))
                         t1y.append(float(d1['1']))
                         t2y.append(float(d1['2']))
-                        cont2 += 1
+                        cont2 = next(c2)
                         barra.update(1)
-                        time.sleep(0.90)
+                        time.sleep(0.85)
                     except ValueError:
                         print('error')
                         continue
@@ -355,7 +363,7 @@ def main():
         plot_pressao(py, inicio, path)
         plot_temp1(t1y, inicio, path)
         plot_temp2(t2y, inicio, path)
-        cont3 += 1
+        cont3 = next(c3)
         emaail = EmailThread(inicio, round(mean(uy), 2), round(mean(py), 2),
                              round(mean(t1y), 2), round(mean(t2y), 2),
                              maxi(t1y), mini(t1y), maxi(t2y), mini(t2y),

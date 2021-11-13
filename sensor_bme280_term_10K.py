@@ -1,14 +1,15 @@
-from tqdm import tqdm
 import os
 import serial
 import time
 import csv
 import matplotlib.pyplot as plt
+import smtplib
+from tqdm import tqdm
 from threading import Thread
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-import smtplib
+from email.mime.image import MIMEImage
 from confidentials import meu_email, minha_senha, my_recipients, define_arquivo
 from statistics import mean
 from string import Template
@@ -20,7 +21,7 @@ if os.path.isfile('EMAIL_USER_DATA.txt'):
     print('Arquivo "EMAIL_USER_DATA.txt" já existe.')
 else:
     define_arquivo()
-    print('Arquivo "EMAIL_USER_DATA.txt" foi criado, por favor, configure antes de continuar. Digite enter para continuar...')
+    print('Arquivo "EMAIL_USER_DATA.txt" foi criado, por favor, configure antes de continuar. Tecle enter para continuar...')
     input()
 
 set_porta = '/dev/ttyACM0'
@@ -74,6 +75,7 @@ class EmailThread(Thread):
             pressao = f'{self.path}/Pressao{self.inicio}.pdf'
             tmp1 = f'{self.path}/Temperatura_Interna{self.inicio}.pdf'
             temp2 = f'{self.path}/Temperatura_Externa{self.inicio}.pdf'
+            foto = f'{self.path}/IMG_20211107_165640.jpg'
             # log = '/home/fernando/PYTHON_PIPENV_ESTACAO_METEREO/log_bme280.csv'
 
             with open(umidade, 'rb') as pdf_U:
@@ -99,6 +101,10 @@ class EmailThread(Thread):
                 pdf_T2.close()
                 anexo_T2.add_header('Conteudo', temp2)
                 msg.attach(anexo_T2)
+
+            with open(foto, 'rb') as pic:
+                pic = MIMEImage(pic.read())
+                msg.attach(pic)
 
             # with open(log, 'rb') as csv_file:
             #     anexo_csv = MIMEApplication(csv_file.read(), _subtype='csv')
@@ -331,7 +337,7 @@ def main():
                     try:
                         dado = str(arduino.readline())
                         dado = dado[2:-5]
-                        if dado == nan:
+                        if float(dado[1:].strip()) == nan:
                             continue
                         else:
                             if dado[0] == 'u':

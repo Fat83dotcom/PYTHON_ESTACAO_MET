@@ -9,7 +9,6 @@ from threading import Thread
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
-from email.mime.image import MIMEImage
 from confidentials import meu_email, minha_senha, my_recipients, define_arquivo
 from statistics import mean
 from string import Template
@@ -75,7 +74,6 @@ class EmailThread(Thread):
             pressao = f'{self.path}/Pressao{self.inicio}.pdf'
             tmp1 = f'{self.path}/Temperatura_Interna{self.inicio}.pdf'
             temp2 = f'{self.path}/Temperatura_Externa{self.inicio}.pdf'
-            foto = f'{self.path}/IMG_20211107_165640.jpg'
             # log = '/home/fernando/PYTHON_PIPENV_ESTACAO_METEREO/log_bme280.csv'
 
             with open(umidade, 'rb') as pdf_U:
@@ -101,10 +99,6 @@ class EmailThread(Thread):
                 pdf_T2.close()
                 anexo_T2.add_header('Conteudo', temp2)
                 msg.attach(anexo_T2)
-
-            with open(foto, 'rb') as pic:
-                pic = MIMEImage(pic.read())
-                msg.attach(pic)
 
             # with open(log, 'rb') as csv_file:
             #     anexo_csv = MIMEApplication(csv_file.read(), _subtype='csv')
@@ -361,7 +355,7 @@ def main():
                         t2y.append(float(d1['2']))
                         cont2 = next(c2)
                         barra.update(1)
-                        time.sleep(0.85)
+                        time.sleep(0.98)
                     except ValueError:
                         print('error')
                         continue

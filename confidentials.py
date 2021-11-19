@@ -2,8 +2,7 @@
 Este modulo faz a leitura do email, senha e destinatários de um arquivo externo, que deve estar na
 mesma pasta que o executável Python
 '''
-modelo = '''
-Seu email: xxxxx@xxxxx.com
+modelo = '''Seu email: xxxxx@xxxxx.com
 Sua senha: 123456789
 Destinatarios aqui!
 '''
@@ -38,4 +37,4 @@ def define_arquivo():
 if __name__ == '__main__':
     # print(''.join(meu_email()))
     # print(''.join(minha_senha()))
-    print(''.join(my_recipients()))
+    # print(''.join(my_recipients()))

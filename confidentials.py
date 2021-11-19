@@ -35,6 +35,7 @@ def define_arquivo():
 
 
 if __name__ == '__main__':
+    pass
     # print(''.join(meu_email()))
     # print(''.join(minha_senha()))
     # print(''.join(my_recipients()))

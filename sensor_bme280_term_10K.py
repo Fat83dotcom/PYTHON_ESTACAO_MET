@@ -25,7 +25,7 @@ else:
 
 set_porta = '/dev/ttyACM0'
 
-path = os.path.dirname(os.path.realpath(__file__))
+caminhoDiretorio = os.path.dirname(os.path.realpath(__file__))
 
 while set_porta:
     try:
@@ -59,6 +59,14 @@ class EmailThread(Thread):
         self.ini = ini
         self.fim = fim
 
+    @staticmethod
+    def __anexadorPdf(enderecoPdf, msg):
+        with open(enderecoPdf, 'rb') as pdf:
+            anexo = MIMEApplication(pdf.read(), _subtype='pdf')
+            pdf.close()
+            anexo.add_header('Conteudo', enderecoPdf)
+            msg.attach(anexo)
+
     def run(self):
         msg = MIMEMultipart()
         msg['from'] = 'Fernando Mendes'
@@ -74,46 +82,18 @@ class EmailThread(Thread):
             pressao = f'{self.path}/Pressao{self.inicio}.pdf'
             tmp1 = f'{self.path}/Temperatura_Interna{self.inicio}.pdf'
             temp2 = f'{self.path}/Temperatura_Externa{self.inicio}.pdf'
-            # log = '/home/fernando/PYTHON_PIPENV_ESTACAO_METEREO/log_bme280.csv'
 
-            with open(umidade, 'rb') as pdf_U:
-                anexo_U = MIMEApplication(pdf_U.read(), _subtype='pdf')
-                pdf_U.close()
-                anexo_U.add_header('Conteudo', umidade)
-                msg.attach(anexo_U)
-
-            with open(pressao, 'rb') as pdf_P:
-                anexo_P = MIMEApplication(pdf_P.read(), _subtype='pdf')
-                pdf_P.close()
-                anexo_P.add_header('Conteudo', pressao)
-                msg.attach(anexo_P)
-
-            with open(tmp1, 'rb') as pdf_T1:
-                anexo_T1 = MIMEApplication(pdf_T1.read(), _subtype='pdf')
-                pdf_T1.close()
-                anexo_T1.add_header('Conteudo', tmp1)
-                msg.attach(anexo_T1)
-
-            with open(temp2, 'rb') as pdf_T2:
-                anexo_T2 = MIMEApplication(pdf_T2.read(), _subtype='pdf')
-                pdf_T2.close()
-                anexo_T2.add_header('Conteudo', temp2)
-                msg.attach(anexo_T2)
-
-            # with open(log, 'rb') as csv_file:
-            #     anexo_csv = MIMEApplication(csv_file.read(), _subtype='csv')
-            #     csv_file.close()
-            #     anexo_csv.add_header('Conteudo', log)
-            #     msg.attach(anexo_csv)
+            self.__anexadorPdf(umidade, msg)
+            self.__anexadorPdf(pressao, msg)
+            self.__anexadorPdf(tmp1, msg)
+            self.__anexadorPdf(temp2, msg)
 
             with smtplib.SMTP(host='smtp.gmail.com', port=587) as smtp:
                 smtp.ehlo()
                 smtp.starttls()
                 smtp.login(''.join(meu_email()), ''.join(minha_senha()))
                 smtp.send_message(msg)
-                # print('Email enviado com sucesso.')
         except FileNotFoundError:
-            # print('Email não enviado.')
             pass
 
         os.remove(f'{self.path}/Umidade{self.inicio}.pdf')
@@ -193,18 +173,18 @@ def data():
     return data
 
 
-def maxi(dados):
+def maximos(dados):
     return round(max(dados), 2)
 
 
-def mini(dados):
+def minimos(dados):
     return round(min(dados), 2)
 
 
 def plot_umidade(uy, inicio, path):
     ux = range(len(uy))
     file = f'{path}/Umidade{inicio}.pdf'
-    plt.title(f'Gráfico Umidade\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maxi(uy)} --- Mínima: {mini(uy)}')
+    plt.title(f'Gráfico Umidade\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maximos(uy)} --- Mínima: {minimos(uy)}')
     plt.xlabel('Tempo em segundos.')
     plt.ylabel('Umidade Relativa do Ar %')
     plt.plot(ux, uy)
@@ -215,7 +195,7 @@ def plot_umidade(uy, inicio, path):
 def plot_pressao(py, inicio, path):
     px = range(len(py))
     file = f'{path}/Pressao{inicio}.pdf'
-    plt.title(f'Gráfico Pressão\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maxi(py)} --- Mínima: {mini(py)}')
+    plt.title(f'Gráfico Pressão\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maximos(py)} --- Mínima: {minimos(py)}')
     plt.xlabel('Tempo em segundos.')
     plt.ylabel('Pressão Atmosferica em hPa')
     plt.plot(px, py)
@@ -226,7 +206,7 @@ def plot_pressao(py, inicio, path):
 def plot_temp1(t1y, inicio, path):
     t1x = range(len(t1y))
     file = f'{path}/Temperatura_Interna{inicio}.pdf'
-    plt.title(f'Gráfico Temp Interna\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maxi(t1y)} --- Mínima: {mini(t1y)}')
+    plt.title(f'Gráfico Temp Interna\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maximos(t1y)} --- Mínima: {minimos(t1y)}')
     plt.xlabel('Tempo em segundos.')
     plt.ylabel('Temperatura em °C')
     plt.plot(t1x, t1y)
@@ -237,7 +217,7 @@ def plot_temp1(t1y, inicio, path):
 def plot_temp2(t2y, inicio, path):
     t2x = range(len(t2y))
     file = f'{path}/Temperatura_Externa{inicio}.pdf'
-    plt.title(f'Gráfico Temp Externa\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maxi(t2y)} --- Mínima: {mini(t2y)}')
+    plt.title(f'Gráfico Temp Externa\n-> Inicio: {inicio} <-|-> Termino: {data()} <-\nMáxima: {maximos(t2y)} --- Mínima: {minimos(t2y)}')
     plt.xlabel('Tempo em segundos.')
     plt.ylabel('Temperatura em °C')
     plt.plot(t2x, t2y)
@@ -245,33 +225,33 @@ def plot_temp2(t2y, inicio, path):
     plt.clf()
 
 
-def flagEntry():
-    opition = ''
-    cont = 0
+def interfaceInicial():
+    opcao = ''
+    contador = 0
     tentativa = 5
-    while opition == '' and cont < tentativa:
-        print(f'{cont  + 1}ª tentativa... {tentativa - (cont + 1)} restantes.')
+    while opcao == '' and contador < tentativa:
+        print(f'{contador  + 1}ª tentativa... {tentativa - (contador + 1)} restantes.')
         print('Tempo padrão: 1 Hora.')
-        opition = input('Deseja definir a frequencia dos gráficos ?[S/N]: ').upper()
-        if opition[0] == 'S':
-            call = call_tempo()
-            if call:
+        opcao = input('Deseja definir a frequencia dos gráficos ?[S/N]: ').upper()
+        if opcao[0] == 'S':
+            chamaDefinicaDeTempo = definicaDeTempo()
+            if chamaDefinicaDeTempo:
                 print('Em Execução ....')
-                return int(call)
+                return int(chamaDefinicaDeTempo)
             else:
-                cont += 1
-                opition = ''
+                contador += 1
+                opcao = ''
                 continue
         else:
             print('Tempo padrão definido, 1 hora.')
-            flag_entry = 3600
-            return flag_entry
+            tempoPadrao = 3600
+            return tempoPadrao
     print('O tempo padrão foi definito: 1 hora.')
-    flag_entry = 3600
-    return flag_entry
+    tempoPadrao = 3600
+    return tempoPadrao
 
 
-def call_tempo():
+def definicaDeTempo():
     print('Intervalo máximo: 6 horas.')
     print('Digite as horas, minutos e segundos para saida de gráficos: ')
     hora = input('Digite o tempo em horas: ')
@@ -279,15 +259,15 @@ def call_tempo():
     segundo = input('Digite o tempo em segundos: ')
     try:
         if 0 <= int(minuto) < 60 and 0 <= int(segundo) < 60:
-            flag_entry = ConvertTempo(int(hora), int(minuto), int(segundo))
-            flag_entry = flag_entry.soma_tempo()
-            if flag_entry > 21600:
-                flag_entry = 21600
-                print(f'Tempo definido em {flag_entry} segundos/ {flag_entry/3600} horas.')
-                return int(flag_entry)
+            tempoDefinido = ConvertTempo(int(hora), int(minuto), int(segundo))
+            tempoDefinido = tempoDefinido.soma_tempo()
+            if tempoDefinido > 21600:
+                tempoDefinido = 21600
+                print(f'Tempo definido em {tempoDefinido} segundos/ {tempoDefinido/3600} horas.')
+                return int(tempoDefinido)
             else:
-                print(f'Tempo definido em {flag_entry} segundos/ {flag_entry/3600} horas.')
-                return int(flag_entry)
+                print(f'Tempo definido em {tempoDefinido} segundos/ {tempoDefinido/3600} horas.')
+                return int(tempoDefinido)
         else:
             print('Digite os minutos e segundos entre 0 e 59.')
             return None
@@ -299,35 +279,35 @@ def call_tempo():
 
 def main():
     c3 = count()
-    cont3 = next(c3)
+    contador3 = next(c3)
     while 1:
-        if cont3 == 0:
-            tempo_graf = int(flagEntry())
+        if contador3 == 0:
+            tempo_graf = int(interfaceInicial())
             print(f'Inicio: --> {data()} <--')
             arduino.reset_input_buffer()
         else:
-            print(f'Parcial {cont3} --> {data()} <--')
+            print(f'Parcial {contador3} --> {data()} <--')
 
         inicio = data()
 
-        uy = []
-        py = []
-        t1y = []
-        t2y = []
+        yDadosUmidade = []
+        yDadosPressao = []
+        yDadosTemperaturaInterna = []
+        yDadosTemperaturaExterna = []
 
-        d1 = {
+        dadosRecebidosArduino = {
             'u': '',
             'p': '',
             '1': '',
             '2': ''
         }
         c2 = count()
-        cont2 = next(c2)
+        contador2 = next(c2)
         with tqdm(total=tempo_graf) as barra:
-            while cont2 < tempo_graf:
+            while contador2 < tempo_graf:
                 c1 = count()
-                cont = next(c1)
-                while cont < 8:
+                contador1 = next(c1)
+                while contador1 < 8:
                     try:
                         dado = str(arduino.readline())
                         dado = dado[2:-5]
@@ -335,40 +315,42 @@ def main():
                             continue
                         else:
                             if dado[0] == 'u':
-                                d1['u'] = float(dado[1:].strip())
+                                dadosRecebidosArduino['u'] = float(dado[1:].strip())
                             if dado[0] == 'p':
-                                d1['p'] = float(dado[1:].strip())
+                                dadosRecebidosArduino['p'] = float(dado[1:].strip())
                             if dado[0] == '1':
-                                d1['1'] = float(dado[1:].strip())
+                                dadosRecebidosArduino['1'] = float(dado[1:].strip())
                             if dado[0] == '2':
-                                d1['2'] = float(dado[1:].strip())
+                                dadosRecebidosArduino['2'] = float(dado[1:].strip())
                     except (ValueError, IndexError):
                         continue
-                    cont = next(c1)
+                    contador1 = next(c1)
                 with open('log_bme280.csv', 'a+', newline='', encoding='utf-8') as log:
                     try:
                         w = csv.writer(log)
-                        w.writerow([data(), d1['u'], d1['p'], d1['1'], d1['2']])
-                        uy.append(float(d1['u']))
-                        py.append(float(d1['p']))
-                        t1y.append(float(d1['1']))
-                        t2y.append(float(d1['2']))
-                        cont2 = next(c2)
+                        w.writerow([data(), dadosRecebidosArduino['u'], dadosRecebidosArduino['p'],
+                                    dadosRecebidosArduino['1'], dadosRecebidosArduino['2']])
+                        yDadosUmidade.append(float(dadosRecebidosArduino['u']))
+                        yDadosPressao.append(float(dadosRecebidosArduino['p']))
+                        yDadosTemperaturaInterna.append(float(dadosRecebidosArduino['1']))
+                        yDadosTemperaturaExterna.append(float(dadosRecebidosArduino['2']))
+                        contador2 = next(c2)
                         barra.update(1)
-                        time.sleep(0.98)
+                        time.sleep(0.85)
                     except ValueError:
                         print('error')
                         continue
-        plot_umidade(uy, inicio, path)
-        plot_pressao(py, inicio, path)
-        plot_temp1(t1y, inicio, path)
-        plot_temp2(t2y, inicio, path)
-        cont3 = next(c3)
-        emaail = EmailThread(inicio, round(mean(uy), 2), round(mean(py), 2),
-                             round(mean(t1y), 2), round(mean(t2y), 2),
-                             maxi(t1y), mini(t1y), maxi(t2y), mini(t2y),
-                             maxi(uy), mini(uy), maxi(py), mini(py),
-                             inicio, data(), path)
+        plot_umidade(yDadosUmidade, inicio, caminhoDiretorio)
+        plot_pressao(yDadosPressao, inicio, caminhoDiretorio)
+        plot_temp1(yDadosTemperaturaInterna, inicio, caminhoDiretorio)
+        plot_temp2(yDadosTemperaturaExterna, inicio, caminhoDiretorio)
+        contador3 = next(c3)
+        emaail = EmailThread(inicio, round(mean(yDadosUmidade), 2), round(mean(yDadosPressao), 2),
+                             round(mean(yDadosTemperaturaInterna), 2), round(mean(yDadosTemperaturaExterna), 2),
+                             maximos(yDadosTemperaturaInterna), minimos(yDadosTemperaturaInterna), maximos(yDadosTemperaturaExterna),
+                             minimos(yDadosTemperaturaExterna),
+                             maximos(yDadosUmidade), minimos(yDadosUmidade), maximos(yDadosPressao), minimos(yDadosPressao),
+                             inicio, data(), caminhoDiretorio)
         emaail.start()
 
 

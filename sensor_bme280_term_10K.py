@@ -77,24 +77,24 @@ class EmailThread(Thread):
                          self.umimax, self.umimini, self.pressmax, self.pressmini,
                          self.ini, self.fim, data()), 'html')
         msg.attach(corpo)
+
+        umidade = f'{self.path}/Umidade{self.inicio}.pdf'
+        pressao = f'{self.path}/Pressao{self.inicio}.pdf'
+        tmp1 = f'{self.path}/Temperatura_Interna{self.inicio}.pdf'
+        temp2 = f'{self.path}/Temperatura_Externa{self.inicio}.pdf'
+
+        self.__anexadorPdf(umidade, msg)
+        self.__anexadorPdf(pressao, msg)
+        self.__anexadorPdf(tmp1, msg)
+        self.__anexadorPdf(temp2, msg)
         try:
-            umidade = f'{self.path}/Umidade{self.inicio}.pdf'
-            pressao = f'{self.path}/Pressao{self.inicio}.pdf'
-            tmp1 = f'{self.path}/Temperatura_Interna{self.inicio}.pdf'
-            temp2 = f'{self.path}/Temperatura_Externa{self.inicio}.pdf'
-
-            self.__anexadorPdf(umidade, msg)
-            self.__anexadorPdf(pressao, msg)
-            self.__anexadorPdf(tmp1, msg)
-            self.__anexadorPdf(temp2, msg)
-
             with smtplib.SMTP(host='smtp.gmail.com', port=587) as smtp:
                 smtp.ehlo()
                 smtp.starttls()
                 smtp.login(''.join(meu_email()), ''.join(minha_senha()))
                 smtp.send_message(msg)
-        except FileNotFoundError:
-            pass
+        except Exception:
+            print('\nE-mail não enviado, sem conexão.\n\nVerifique a rede.\n')
 
         os.remove(f'{self.path}/Umidade{self.inicio}.pdf')
         os.remove(f'{self.path}/Pressao{self.inicio}.pdf')

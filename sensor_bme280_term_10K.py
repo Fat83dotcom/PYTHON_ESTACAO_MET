@@ -173,6 +173,11 @@ def data():
     return data
 
 
+def dataDoArquivo():
+    dataA = time.strftime('%b_%Y_log.csv').lower()
+    return dataA
+
+
 def maximos(dados):
     return round(max(dados), 2)
 
@@ -325,7 +330,7 @@ def main():
                     except (ValueError, IndexError):
                         continue
                     contador1 = next(c1)
-                with open('log_bme280.csv', 'a+', newline='', encoding='utf-8') as log:
+                with open(dataDoArquivo(), 'a+', newline='', encoding='utf-8') as log:
                     try:
                         w = csv.writer(log)
                         w.writerow([data(), dadosRecebidosArduino['u'], dadosRecebidosArduino['p'],

@@ -1,0 +1,43 @@
+body {
+    background-color: black;
+
+}
+
+h1 {
+    text-align: center; 
+    color: darkred;
+}
+
+h2 {
+    color: red;
+}
+
+strong {
+    color: black;
+}
+
+html {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 24px; 
+    margin: 20px;
+}
+
+li {
+    color: rgb(238, 209, 209);
+}
+
+.rigth {float: right}
+
+.container {
+    background-color: crimson;
+    margin: 400px;
+    margin-top: auto;
+    margin-bottom: auto;
+    padding: 20px;
+    border-radius: 3%;
+}
+
+.rCopy {
+    text-align: center;
+    color: red;
+}

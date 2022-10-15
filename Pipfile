@@ -8,6 +8,7 @@ setuptools = "*"
 tqdm = "*"
 matplotlib = "*"
 pyserial = "*"
+pyinstaller = "*"
 
 [dev-packages]
 pylint = "*"

@@ -23,7 +23,7 @@ else:
     print('Arquivo "EMAIL_USER_DATA.txt" foi criado, por favor, configure antes de continuar. Tecle enter para continuar...')
     input()
 
-set_porta = '/dev/ttyACM0'
+set_porta = '/dev/ttyUSB0'
 
 caminhoDiretorio = os.path.dirname(os.path.realpath(__file__))
 
@@ -239,7 +239,10 @@ def interfaceInicial():
     while opcao == '' and contador < tentativa:
         print(f'{contador  + 1}ª tentativa... {tentativa - (contador + 1)} restantes.')
         print('Tempo padrão: 1 Hora.')
+        
         opcao = input('Deseja definir a frequencia dos gráficos ?[S/N]: ').upper()
+        if opcao == '':
+            opcao = 'N'
         if opcao[0] == 'S':
             chamaDefinicaDeTempo = definicaDeTempo()
             if chamaDefinicaDeTempo:
@@ -310,8 +313,10 @@ def main():
         }
         c2 = count()
         contador2 = next(c2)
+        
         with tqdm(total=tempo_graf) as barra:
             while contador2 < tempo_graf:
+                tempoInicial = time.time()
                 c1 = count()
                 contador1 = next(c1)
                 while contador1 < 8:
@@ -343,10 +348,13 @@ def main():
                         yDadosTemperaturaExterna.append(float(dadosRecebidosArduino['2']))
                         contador2 = next(c2)
                         barra.update(1)
-                        time.sleep(0.85)
                     except ValueError:
                         print('error')
                         continue
+                tempoFinal = time.time()
+                while tempoFinal - tempoInicial < 1:
+                    tempoFinal = time.time()
+        
         plot_umidade(yDadosUmidade, inicio, caminhoDiretorio)
         plot_pressao(yDadosPressao, inicio, caminhoDiretorio)
         plot_temp1(yDadosTemperaturaInterna, inicio, caminhoDiretorio)

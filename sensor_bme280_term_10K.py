@@ -1,5 +1,5 @@
 import os
-import serial
+from serial import Serial
 import time
 import csv
 import matplotlib.pyplot as plt
@@ -29,10 +29,12 @@ caminhoDiretorio = os.path.dirname(os.path.realpath(__file__))
 
 while set_porta:
     try:
-        arduino = serial.Serial(set_porta, 115200, timeout=1)
+        # arduino = serial.Serial(set_porta, 115200, timeout=1)
+        arduino = Serial(set_porta, 115200, timeout=1)
         arduino.reset_input_buffer()
         break
-    except serial.serialutil.SerialException:
+    except Exception as erro:
+        print(erro)
         set_porta = input('Digite a porta serial em que o Arduino está conectado: ')
 print(f'O Arduino está na porta: {set_porta}')
 

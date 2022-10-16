@@ -3,6 +3,7 @@ from serial import Serial
 import time
 import csv
 import matplotlib.pyplot as plt
+import matplotlib.backends.backend_pdf
 import smtplib
 from tqdm import tqdm
 from threading import Thread

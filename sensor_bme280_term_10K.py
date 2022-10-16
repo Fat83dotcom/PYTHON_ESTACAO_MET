@@ -353,12 +353,22 @@ def main():
         plot_temp1(yDadosTemperaturaInterna, inicio, caminhoDiretorio)
         plot_temp2(yDadosTemperaturaExterna, inicio, caminhoDiretorio)
         contador3 = next(c3)
-        emaail = EmailThread(inicio, round(mean(yDadosUmidade), 2), round(mean(yDadosPressao), 2),
-                             round(mean(yDadosTemperaturaInterna), 2), round(mean(yDadosTemperaturaExterna), 2),
-                             maximos(yDadosTemperaturaInterna), minimos(yDadosTemperaturaInterna), maximos(yDadosTemperaturaExterna),
-                             minimos(yDadosTemperaturaExterna),
-                             maximos(yDadosUmidade), minimos(yDadosUmidade), maximos(yDadosPressao), minimos(yDadosPressao),
-                             inicio, data(), caminhoDiretorio)
+        emaail = EmailThread(inicio,
+                            round(mean(yDadosUmidade),2),
+                            round(mean(yDadosPressao), 2),
+                            round(mean(yDadosTemperaturaInterna),2),
+                            round(mean(yDadosTemperaturaExterna), 2),
+                            maximos(yDadosTemperaturaInterna),
+                            minimos(yDadosTemperaturaInterna),
+                            maximos(yDadosTemperaturaExterna),
+                            minimos(yDadosTemperaturaExterna),
+                            maximos(yDadosUmidade),
+                            minimos(yDadosUmidade),
+                            maximos(yDadosPressao),
+                            minimos(yDadosPressao),
+                            inicio,
+                            data(),
+                            caminhoDiretorio)
         emaail.start()
 
 

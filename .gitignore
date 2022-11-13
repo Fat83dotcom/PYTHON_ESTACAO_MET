@@ -1,4 +1,6 @@
 ArquivoDeTestes/
 build/
 dist/
-EMAIL_USER_DATA.TXT
+EMAIL_USER_DATA.txt
+__pycache__/
+.mypy_cache/

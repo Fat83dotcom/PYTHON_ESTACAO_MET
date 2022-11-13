@@ -1,5 +1,6 @@
 import os
 from serial import Serial
+import serial
 import time
 import csv
 import matplotlib.pyplot as plt
@@ -30,8 +31,7 @@ caminhoDiretorio = os.path.dirname(os.path.realpath(__file__))
 
 while set_porta:
     try:
-        # arduino = serial.Serial(set_porta, 115200, timeout=1)
-        arduino = Serial(set_porta, 115200, timeout=1)
+        arduino = Serial(set_porta, 9600, timeout=1, bytesize=serial.EIGHTBITS)
         arduino.reset_input_buffer()
         break
     except Exception as erro:

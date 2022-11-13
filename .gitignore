@@ -2,3 +2,7 @@ ArquivoDeTestes/
 estacao/
 __pychache__
 build/
+dist/
+EMAIL_USER_DATA.txt
+__pycache__/
+.mypy_cache/

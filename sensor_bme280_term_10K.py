@@ -1,5 +1,6 @@
 import os
 from serial import Serial
+import serial
 import time
 import csv
 import matplotlib.pyplot as plt
@@ -30,8 +31,7 @@ caminhoDiretorio = os.path.dirname(os.path.realpath(__file__))
 
 while set_porta:
     try:
-        # arduino = serial.Serial(set_porta, 115200, timeout=1)
-        arduino = Serial(set_porta, 115200, timeout=1)
+        arduino = Serial(set_porta, 9600, timeout=1, bytesize=serial.EIGHTBITS)
         arduino.reset_input_buffer()
         break
     except Exception as erro:
@@ -75,7 +75,7 @@ class EmailThread(Thread):
         msg['from'] = 'Fernando Mendes'
         msg['to'] = ','.join(my_recipients())
         msg['subject'] = f'Monitoramento Estação Metereologica Fat83dotcom {data()}'
-        corpo = MIMEText(recebe_dados(self.umi, self.press, self.t1, self.t2,
+        corpo = MIMEText(renderizadorHtml(self.umi, self.press, self.t1, self.t2,
                          self.t1max, self.t1min, self.t2max, self.t2min,
                          self.umimax, self.umimini, self.pressmax, self.pressmini,
                          self.ini, self.fim, data()), 'html')
@@ -150,7 +150,7 @@ def leia_me():
         file.write(texto)
 
 
-def recebe_dados(umidade, pressao, temp1, temp2, temp1max, temp1min,
+def renderizadorHtml(umidade, pressao, temp1, temp2, temp1max, temp1min,
                  temp2max, temp2min, umima, umimi, pressma, pressmi,
                  inicio, fim, data):
     with open('template.html', 'r') as doc:
